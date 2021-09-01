@@ -18,3 +18,13 @@ int N, NTHREADS, primo, prox;
 
 pthread_mutex_t x_mutex;
 pthread_t id [MAX_NTHREADS];
+
+// elimina todos os multiplos impares de x
+void elimina(int x){  
+
+    int i;
+
+    for (i = 3; i*x <= N; i += 2)  {
+        primo[i*x] = 0;
+    }
+}
