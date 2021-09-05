@@ -13,18 +13,90 @@
 #define MAX_NTHREADS 20 //numero de threads
 #define NMAX 100000000 //tamanho max da sequencia a´te onde vai identificar os primos
 
-int N, NTHREADS, primo, prox;
+int N, NTHREADS, primo, prox, x; // variaveis globais
 
+pthread_t id [MAX_NTHREADS]; //ID das threads
+pthread_mutex_t x_mutex; // lock para a variavel 'prox' acessada pelas threads
 
-pthread_mutex_t x_mutex;
-pthread_t id [MAX_NTHREADS];
-
-// elimina todos os multiplos impares de x
-void elimina(int x){  
-
+void elimina(x) //elimina os multiplos impares a variavel
+{  
     int i;
-
-    for (i = 3; i*x <= N; i += 2)  {
+    for (i = 3; i*x <= N; i += 2)
+    {
         primo[i*x] = 0;
     }
+}
+
+void *tarefa(void* threadN)  {  
+    int lim,base;
+    int tarefa = 0;  // trabalho feito pela thread
+    lim = sqrt(N);
+    do  {
+
+      pthread_mutex_lock(&proxLock); //bloqueia o acesso
+      base = prox;
+      prox += 2;
+      
+      pthread_mutex_unlock(&proxLock); //libera o acesso 
+
+      if (base <= lim)  {
+         if (primo[base])  {
+            elimina(base);
+            trabalho++;  
+         }
+      }
+      else{
+          return (void *) trabalho;
+      }
+   } while (1);
+}
+
+int main(){
+
+    int resol, qnt_prime; // numero de primos achados
+    
+	//recebe e valida os parametros de entrada (dimensao do vetor, numero de threads)
+    if(argc < 3) {
+        fprintf(stderr, "Digite: %s <dimensao sequencia> <numero threads>\n", argv[0]);
+        return 1; 
+    }
+    N = atoi(argv[1]);
+    nthreads = atoi(argv[2]);
+    
+    clock_t tempo1 = clock();
+    // marca todos os numeros pares ja que nao sao primos
+    // primos 1 ate serem validados
+    for (int i = 3; i <= N; i++)  {
+       if (i%2 == 0) primo[i] = 0;
+       else {
+           primo[i] = 1;
+       }
+    }
+
+prox = 3;
+    
+    for (int i = 0; i < nthreads; i++) // dá inicio as threads
+    {
+        pthread_create(&id[i],NULL,tarefa,NULL);
+    }
+
+    
+    for (int i = 0; i < NTHREADS; i++)  //espera as threads terminarem
+    {
+        pthread_join(id[i],&qnt_prime);
+        ("%d valor retornado pela thread\n",resol);
+    }
+    tempo1 = clock() - tempo1;
+    double tempoExecucao1 = (double)(tempo1) / CLOCKS_PER_SEC;
+    printf("\nTempo concorrente: %f\n", tempoExecucao1);
+
+
+    // resultados
+    qnt_prime = 1;
+    for (int i = 3; i <= N; i++)
+       if (primo[i])  {
+          qnt_prime++;
+       }
+    printf("o numero de primos achados foi: %d\n",qnt_prime);
+    
 }
