@@ -13,12 +13,12 @@
 #define MAX_NTHREADS 20 //numero de threads
 #define NMAX 100000000 //tamanho max da sequencia a´te onde vai identificar os primos
 
-int N, NTHREADS, primo, prox, x; // variaveis globais
+int N, NTHREADS, primo[NMAX+1], prox, x; // variaveis globais
 
 pthread_t id [MAX_NTHREADS]; //ID das threads
-pthread_mutex_t x_mutex; // lock para a variavel 'prox' acessada pelas threads
+pthread_mutex_t proxLock = PTHREAD_MUTEX_INITIALIZER; // lock para a variavel 'prox' acessada pelas threads
 
-void elimina(x) //elimina os multiplos impares a variavel
+void elimina(int x) //elimina os multiplos impares a variavel
 {  
     int i;
     for (i = 3; i*x <= N; i += 2)
@@ -42,31 +42,31 @@ void *tarefa(void* threadN)  {
       if (base <= lim)  {
          if (primo[base])  {
             elimina(base);
-            trabalho++;  
+            tarefa++;  
          }
       }
       else{
-          return (void *) trabalho;
+          return (void *) tarefa;
       }
    } while (1);
 }
 
-int main(){
+int main(int argc, char *argv[]){
 
     int resol, qnt_prime; // numero de primos achados
     
-	//recebe e valida os parametros de entrada (dimensao do vetor, numero de threads)
-    if(argc < 3) {
-        fprintf(stderr, "Digite: %s <dimensao sequencia> <numero threads>\n", argv[0]);
+    if(argc < 3) //recebe e valida os parametros de entrada (dimensao do vetor, numero de threads) 
+    {
+        fprintf(stderr, "Digite: %s <dimensao sequencia> <quantidade de threads>\n", argv[0]);
         return 1; 
     }
     N = atoi(argv[1]);
-    nthreads = atoi(argv[2]);
+    NTHREADS = atoi(argv[2]);
     
     clock_t tempo1 = clock();
-    // marca todos os numeros pares ja que nao sao primos
-    // primos 1 ate serem validados
-    for (int i = 3; i <= N; i++)  {
+
+    for (int i = 3; i <= N; i++) // primos 1 ate serem validados 
+    {
        if (i%2 == 0) primo[i] = 0;
        else {
            primo[i] = 1;
@@ -75,7 +75,7 @@ int main(){
 
 prox = 3;
     
-    for (int i = 0; i < nthreads; i++) // dá inicio as threads
+    for (int i = 0; i < NTHREADS; i++) // dá inicio as threads
     {
         pthread_create(&id[i],NULL,tarefa,NULL);
     }
