@@ -7,7 +7,6 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <time.h>
 
 #define MAX_NTHREADS 20 //numero de threads
@@ -28,20 +27,19 @@ void elimina(int x) //elimina os multiplos impares a variavel
 }
 
 void *tarefa(void* threadN)  {  
-    int lim,base;
-    int tarefa = 0;  // trabalho feito pela thread
-    lim = sqrt(N);
+    int limite,inicio , tarefa = 0;  // tarefa feito pela thread
+    limite = sqrt(N);
     do  {
 
       pthread_mutex_lock(&proxLock); //bloqueia o acesso
-      base = prox;
+      inicio = prox;
       prox += 2;
       
       pthread_mutex_unlock(&proxLock); //libera o acesso 
 
-      if (base <= lim)  {
-         if (primo[base])  {
-            elimina(base);
+      if (inicio <= limite)  {
+         if (primo[inicio])  {
+            elimina(inicio);
             tarefa++;  
          }
       }
@@ -51,7 +49,8 @@ void *tarefa(void* threadN)  {
    } while (1);
 }
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[]) //funcão principal
+    {
 
     int resol, qnt_prime; // numero de primos achados
     
@@ -79,19 +78,16 @@ prox = 3;
     {
         pthread_create(&id[i],NULL,tarefa,NULL);
     }
-
     
     for (int i = 0; i < NTHREADS; i++)  //espera as threads terminarem
     {
         pthread_join(id[i],&qnt_prime);
-        ("%d valor retornado pela thread\n",resol);
     }
+    
     tempo1 = clock() - tempo1;
     double tempoExecucao1 = (double)(tempo1) / CLOCKS_PER_SEC;
-    printf("\nTempo concorrente: %f\n", tempoExecucao1);
+    printf("\nTempo de execução: %f\n", tempoExecucao1);
 
-
-    // resultados
     qnt_prime = 1;
     for (int i = 3; i <= N; i++)
        if (primo[i])  {
