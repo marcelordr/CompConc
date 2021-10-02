@@ -3,9 +3,7 @@
 #include <stdlib.h>
 #include <semaphore.h>
 
-// Semaforos
-sem_t semX , semY , semZ;
-
+sem_t semX , semY , semZ; // Semaforos
 
 // Thread 1 
 void *a () {
@@ -42,23 +40,22 @@ void *d (){
 // Funcao principal 
 int main() 
 {
-    pthread_t threads[4];
+    pthread_t NTHREADS[4];
     int i;
     sem_init(&semX,0,0); // Inicializando os semaforos
     sem_init(&semY,0,0);
     sem_init(&semZ,0,0);
-    pthread_create(&threads[0], NULL, a, NULL); // Criando as Threads
-    pthread_create(&threads[1], NULL, b, NULL);
-    pthread_create(&threads[2], NULL, c, NULL);
-    pthread_create(&threads[3], NULL, d, NULL);
+    pthread_create(&NTHREADS[0], NULL, a, NULL); // Criando as Threads
+    pthread_create(&NTHREADS[1], NULL, b, NULL);
+    pthread_create(&NTHREADS[2], NULL, c, NULL);
+    pthread_create(&NTHREADS[3], NULL, d, NULL);
 
     // Aguardando o término das threads
     for (int i = 0; i < NTHREADS; i++) { // pthread_join
-        pthread_join(threads[i], NULL);
+        pthread_join(NTHREADS[i], NULL);
     }
 
-    // Desalocando variáveis e encerrando o programa
-    sem_destroy(&semX);
+    sem_destroy(&semX);   // Desalocando
     sem_destroy(&semY);
     sem_destroy(&semZ);
     return 0;
